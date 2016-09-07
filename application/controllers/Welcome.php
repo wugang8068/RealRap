@@ -28,8 +28,9 @@ class Welcome extends CI_Controller {
 		])->order([
 				'user_id' => 'desc',
 				'user_mobile' => 'desc'
-		])->get();
-//		echo $this->db->last_query();
-		echo json_encode($users);
+		])->limit(1)->getOne();
+		//$users->user_mobile = '17288';
+		//print_r($users->save());
+		print_r(json_encode($users));
 	}
 }

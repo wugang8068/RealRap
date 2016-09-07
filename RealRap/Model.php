@@ -14,12 +14,12 @@ abstract class Model
      * 表名
      * @var
      */
-    public $table;
+    protected $table;
     /**
      * 主键名
      * @var string
      */
-    public $primaryKey = 'id';
+    protected $primaryKey = 'id';
 
     /**
      * 属性列表
@@ -45,19 +45,29 @@ abstract class Model
      */
     protected $appends = [];
 
-
     /**
      * 类型转换字段
      * @var array
      */
     protected $cast    = [];
 
+
+    /**
+     * 原始字段
+     * @var array
+     */
+    protected $origins = [];
+
     /**
      * @var Formatter
      */
     private $formatter;
 
-
+    private $exists;
+    /**
+     * @var Builder
+     */
+    private $builder;
     /**
      * @param array $column
      * @return Builder
@@ -75,6 +85,25 @@ abstract class Model
         return $builder;
     }
 
+
+    /**
+     * 保存/更新数据
+     * @return bool
+     */
+    public function save(){
+        $this->builder = new Builder();
+        $this->builder->setModel($this);
+        if($this->exists){
+            $result = $this->builder->update();
+        }else{
+            $result = $this->builder->insert();
+        }
+        if($result){
+            return true;
+        }
+        return false;
+    }
+
     public function resultHandle($queryResult){
         $tempArray = [];
         foreach($queryResult as $row){
@@ -88,6 +117,9 @@ abstract class Model
                     }else{
                         $instance->$key = $value;
                     }
+                    if($instance->primaryKey != $key){
+                        $instance->origins[] = $key;
+                    }
                     if(isset($instance->attributes[$key])){
                         $replaceKey = $instance->attributes[$key];
                         $instance->$replaceKey = $instance->$key;
@@ -95,6 +127,7 @@ abstract class Model
                     }
                 }
             }
+            $instance->exists = true;
             $tempArray[] = $instance;
         }
         return $tempArray;
@@ -105,5 +138,21 @@ abstract class Model
             $this->formatter = new Formatter();
         }
         return $this->formatter->format($value,$cast);
+    }
+
+    public function getOriginFields(){
+        return $this->origins;
+    }
+
+    public function getPrimaryKey(){
+        return $this->primaryKey;
+    }
+
+    public function getAttributes(){
+        return $this->attributes;
+    }
+
+    public function getTable(){
+        return $this->table;
     }
 }

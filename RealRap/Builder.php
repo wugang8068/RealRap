@@ -8,13 +8,17 @@
 
 namespace RealRap;
 
-
 class Builder
 {
     /**
      * @var \CI_Controller
      */
     private $ci;
+
+    /**
+     * @var \CI_DB_query_builder
+     */
+    private $db;
 
     /**
      * @var Model
@@ -26,15 +30,26 @@ class Builder
      */
     private $column;
 
+    /**
+     * @var array
+     */
     private $where = [];
 
+    /**
+     * @var array
+     */
     private $order = [];
+
+    private $limit;
+
+    private $offset = 0;
 
     public function __construct()
     {
         $this->ci = &get_instance();
-        if(!isset($this->ci->db)){
+        if(!isset($this->db)){
             $this->ci->load->database();
+            $this->db = &$this->ci->db;
         }
     }
 
@@ -42,7 +57,7 @@ class Builder
     /**
      * @param Model $model
      */
-    public function setModel(Model $model){
+    public function setModel(Model &$model){
         $this->model = $model;
     }
 
@@ -76,30 +91,91 @@ class Builder
         return $this;
     }
 
+    public function limit($limit){
+        $this->limit = $limit;
+        return $this;
+    }
+
+    public function offset($offset){
+        $this->offset = $offset;
+        return $this;
+    }
     /**
      * 获取列表集合
-     * @return array
+     * @return Model[]
      */
     public function get(){
-        $db = &$this->ci->db;
-        $db->start_cache();
-        $db->select($this->column);
-        $db->from($this->model->table);
+        $this->db->start_cache();
+        $this->db->select($this->column);
+        $this->db->from($this->model->getTable());
         if($this->where){
-            $db->where($this->where);
+            $this->db->where($this->where);
         }
         if($this->order){
             foreach($this->order as $order => $sort){
-                $db->order_by($order,$sort);
+                $this->db->order_by($order,$sort);
             }
         }
-        $query = $db->get();
+        if($this->limit){
+            $this->db->limit($this->limit,$this->offset);
+        }
+        $query = $this->db->get();
         $tempArray = [];
         foreach($query->result_array() as $row){
             $tempArray[] = $row;
         }
-        $db->flush_cache();
+        $this->db->flush_cache();
         return $this->model->resultHandle($tempArray);
+    }
+
+
+    /**
+     * @return Model|null
+     */
+    public function getOne(){
+        $this->limit(1);
+        $result = $this->get();
+        return $result ? $result[0] : null;
+    }
+
+
+    /**
+     * @return bool|null
+     * @throws \ErrorException
+     */
+    public function update(){
+        if($updateArray = $this->getUpdateFieldAndValue()){
+            $primaryKey = $this->model->getPrimaryKey();
+            if(isset($this->model->$primaryKey)){
+                $primaryValue = $this->model->$primaryKey;
+            }else{
+                $originField = $this->model->getAttributes()[$primaryKey];
+                $primaryValue = $this->model->$originField;
+            }
+            if(!$primaryValue){
+                throw new \ErrorException;
+            }
+            $this->db->where($primaryKey,$primaryValue);
+            return $this->db->update($this->model->getTable(),$updateArray);
+        }
+        return false;
+    }
+
+    private function getUpdateFieldAndValue(){
+        if($field = $this->model->getOriginFields()){
+            $updateArray = [];
+            foreach($field as $item){
+                if(isset($this->model->$item)){
+                    $updateArray[$item] = $this->model->$item;
+                }
+            }
+            return $updateArray;
+        }
+        return null;
+    }
+
+    public function insert(){
+        return true;
     }
 
     /**

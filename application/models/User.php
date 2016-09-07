@@ -18,7 +18,9 @@ use RealRap\Model;
 class User extends Model
 {
 
-    public $table = 'inf_user';
+    protected $table = 'inf_user';
+
+    protected $primaryKey = 'user_id';
 
     protected $cast = [
         'user_id' => 'integer',
