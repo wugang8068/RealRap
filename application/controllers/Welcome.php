@@ -22,24 +22,42 @@ class Welcome extends CI_Controller {
 	}
 
 	public function retrieve(){
-		header('Content-Type:application/json');
-		$users = User::all(['*'])->where([
-				'user_id <=' => 50
-		])->order([
-				'user_id' => 'desc',
-				'user_mobile' => 'desc'
-		])->limit(1)->getOne();
-		print_r(json_encode($users));
+        $users = User::all(['*'])->where([
+            'user_id <=' => 50
+        ])->order([
+            'user_id' => 'desc',
+            'user_mobile' => 'desc'
+        ])->limit(1)->getOne();
+        print_r(json_encode($users));
 	}
 
-    public function delete(){
-//        $user = User::findWhere(['user_mobile' => '18600908262'])->getOne();
-//        if($user){
-//            print_r($user->delete() ? 'record delete success' : 'record delete failed');
-//        }else{
-//            print_r('record is not exists');
-//        }
+    public function transaction(){
+        \RealRap\RealRap::trans(function(){
 
-       print_r(User::findWhere(['user_mobile' => '18600908262'])->delete() ? 'record delete success' : 'record delete failed');
+
+            $user = new User();
+            $user->user_mobile = '13345727773';
+            $user->save();
+
+            $user = new User();
+            $user->user_mobile = '13347808105';
+            $user->save();
+        },function(){
+            echo 'success Retrieve';
+        },function(){
+            echo 'error Retrieve';
+        });
+    }
+
+    public function delete(){
+        $user = User::findWhere(['user_mobile' => '18600908262'])->getOne();
+        if($user){
+            print_r($user->delete() ? 'record delete success' : 'record delete failed');
+        }else{
+            print_r('record is not exists');
+        }
+
+        //or
+        //print_r(User::findWhere(['user_mobile' => '18600908262'])->delete() ? 'record delete success' : 'record delete failed');
     }
 }

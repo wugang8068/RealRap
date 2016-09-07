@@ -29,7 +29,7 @@ The result mybe like this:
 
 In the User.php, we can just write like this:
 
-> ```
+> ```php
 > class User extends Model{
 >
 >     protected $table = 'inf_user';
@@ -60,7 +60,7 @@ In the User.php, we can just write like this:
 
 ### Update
 
-> ```
+> ```php
 > $user = User::findWhere([
 >     'user_mobile' => '12381121695'
 > ])->getOne();
@@ -91,8 +91,25 @@ In the User.php, we can just write like this:
 
 or
 
-> ```
+> ```php
 > User::findWhere(['user_mobile' => '18600908262'])->delete()
+> ```
+
+### Transaction
+
+> ```php
+> \RealRap\RealRap::trans(function(){
+>     $user = new User();
+>     $user->user_mobile = '13345727773';
+>     $user->save();
+>     $user = new User();
+>     $user->user_mobile = '13347818106';
+>     $user->save();
+> },function(){
+>    echo 'success Retrieve';
+> },function(){
+>    echo 'error Retrieve';
+> });
 > ```
 
 To DO LIST:

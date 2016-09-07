@@ -8,17 +8,11 @@
 
 namespace RealRap;
 
+use RealRap\Traits\RealRapDatabase;
+
 class Builder
 {
-    /**
-     * @var \CI_Controller
-     */
-    private $ci;
-
-    /**
-     * @var \CI_DB_query_builder
-     */
-    private $db;
+    use RealRapDatabase;
 
     /**
      * @var Model
@@ -40,18 +34,15 @@ class Builder
      */
     private $order = [];
 
+    /**
+     * @var
+     */
     private $limit;
 
+    /**
+     * @var int
+     */
     private $offset = 0;
-
-    public function __construct()
-    {
-        $this->ci = &get_instance();
-        if(!isset($this->db)){
-            $this->ci->load->database();
-            $this->db = &$this->ci->db;
-        }
-    }
 
 
     /**
@@ -72,7 +63,7 @@ class Builder
 
 
     /**
-     * 条件筛选字段
+     * filter
      * @param $where array
      * @return $this
      */
@@ -84,7 +75,7 @@ class Builder
     }
 
     /**
-     * 排序字段
+     * order
      * @param $order
      * @return $this
      */
@@ -93,11 +84,19 @@ class Builder
         return $this;
     }
 
+    /**
+     * @param $limit
+     * @return $this
+     */
     public function limit($limit){
         $this->limit = $limit;
         return $this;
     }
 
+    /**
+     * @param $offset
+     * @return $this
+     */
     public function offset($offset){
         $this->offset = $offset;
         return $this;
@@ -161,6 +160,9 @@ class Builder
         return false;
     }
 
+    /**
+     * @return array|null
+     */
     private function getUpdateFieldAndValue(){
         if($field = $this->model->getOriginFields()){
             $updateArray = [];
@@ -174,6 +176,9 @@ class Builder
         return null;
     }
 
+    /**
+     * @return bool
+     */
     public function insert(){
         $fills = $this->model->getFillsData();
         $helper = new ModelHelper($this->model);
@@ -195,6 +200,9 @@ class Builder
         return false;
     }
 
+    /**
+     * @return bool|mixed
+     */
     public function delete(){
         if($this->model && $this->model->isExists()){
             if($this->where){
