@@ -70,8 +70,6 @@ In the User.php, we can just write like this:
 > }
 > ```
 
-
-
 ### Insert
 
 > ```
@@ -80,7 +78,16 @@ In the User.php, we can just write like this:
 > $user->save();
 > ```
 
+### Delete
 
+> ```
+> $user = User::findWhere(['user_mobile' => '18600908262'])->getOne();
+> if($user){
+>     print_r($user->delete() ? 'record delete success' : 'record delete failed');
+> }else{
+>     print_r('record is not exists');
+> }
+> ```
 
 To DO LIST:
 

@@ -31,4 +31,13 @@ class Welcome extends CI_Controller {
 		])->limit(1)->getOne();
 		print_r(json_encode($users));
 	}
+
+    public function delete(){
+        $user = User::findWhere(['user_mobile' => '18600908262'])->getOne();
+        if($user){
+            print_r($user->delete() ? 'record delete success' : 'record delete failed');
+        }else{
+            print_r('record is not exists');
+        }
+    }
 }

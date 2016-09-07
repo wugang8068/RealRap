@@ -69,6 +69,9 @@ abstract class Model
      */
     private $formatter;
 
+    /**
+     * @var
+     */
     private $exists;
     /**
      * @var Builder
@@ -85,6 +88,10 @@ abstract class Model
         return $builder;
     }
 
+    /**
+     * @param $where
+     * @return Builder
+     */
     public static function findWhere($where){
         $builder = self::all();
         $builder->where($where);
@@ -93,24 +100,10 @@ abstract class Model
 
 
     /**
-     * 保存/更新数据
-     * @return bool
+     * handle the result data
+     * @param $queryResult
+     * @return array
      */
-    public function save(){
-        $this->builder = $this->newBuilder();
-        $this->builder->setModel($this);
-        if($this->exists){
-            $result = $this->builder->update();
-        }else{
-            $result = $this->builder->insert();
-            if($result){
-                $this->exists = true;
-                $this->origins = array_merge($this->origins,array_keys($this->fills));
-            }
-        }
-        return $result;
-    }
-
     public function resultHandle($queryResult){
         $tempArray = [];
         foreach($queryResult as $row){
@@ -140,41 +133,124 @@ abstract class Model
         return $tempArray;
     }
 
-    private function format($value,$cast){
+    /**
+     * save or update data
+     * @return bool
+     */
+    public function save(){
+        $this->builder = $this->newBuilder();
+        if($this->exists){
+            $result = $this->builder->update();
+        }else{
+            $result = $this->builder->insert();
+            if($result){
+                $this->exists = true;
+                $this->origins = array_merge($this->origins,array_keys($this->fills));
+            }
+        }
+        return $result;
+    }
+
+
+    /**
+     * delete this record from database
+     * @return bool|mixed
+     */
+    public function delete(){
+        $this->builder = $this->newBuilder();
+        return $this->builder->delete();
+    }
+
+    /**
+     * format the field value
+     * @param $value
+     * @param $cast
+     * @return mixed
+     * @throws Exception\ModelFormatException
+     */
+    private function format($value, $cast){
         if(!$this->formatter){
             $this->formatter = new Formatter();
         }
         return $this->formatter->format($value,$cast);
     }
 
+    /**
+     * @return array
+     */
     public function getOriginFields(){
         return $this->origins;
     }
 
+    /**
+     * @return string
+     */
     public function getPrimaryKey(){
         return $this->primaryKey;
     }
 
+    /**
+     * @return array
+     */
     public function getAttributes(){
         return $this->attributes;
     }
 
+    /**
+     * @return mixed
+     */
     public function getTable(){
         return $this->table;
     }
 
+    /**
+     * @return array
+     */
     public function getFillsData(){
         return $this->fills;
     }
 
 
+    /**
+     * @return Builder
+     */
     private function newBuilder(){
         if(!$this->builder){
             $this->builder = new Builder();
+            $this->builder->setModel($this);
         }
         return $this->builder;
     }
 
+    /**
+     * @return mixed
+     */
+    public function isExists(){
+        return $this->exists;
+    }
+
+
+    /**
+     * return the primary key value
+     * @return null
+     */
+    public function getPrimaryValue(){
+        $primaryKey = $this->getPrimaryKey();
+        if(isset($this->$primaryKey)){
+            return $this->$primaryKey;
+        }else{
+            $originField = $this->getAttributes()[$primaryKey];
+            if(isset($this->$originField)){
+                return $this->$originField;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
     public function __set($name, $value)
     {
         $this->$name = $value;

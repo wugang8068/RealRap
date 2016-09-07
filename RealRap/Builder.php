@@ -150,17 +150,11 @@ class Builder
             if($this->where){
                 $this->db->where($this->where);
             }else{
-                $primaryKey = $this->model->getPrimaryKey();
-                if(isset($this->model->$primaryKey)){
-                    $primaryValue = $this->model->$primaryKey;
-                }else{
-                    $originField = $this->model->getAttributes()[$primaryKey];
-                    $primaryValue = $this->model->$originField;
-                }
+                $primaryValue = $this->model->getPrimaryValue();
                 if(!$primaryValue){
                     throw new \ErrorException;
                 }
-                $this->db->where($primaryKey,$primaryValue);
+                $this->db->where($this->model->getPrimaryKey(),$primaryValue);
             }
             return $this->db->update($this->model->getTable(),$updateArray);
         }
@@ -197,6 +191,20 @@ class Builder
             $primaryKey = $this->model->getPrimaryKey();
             $this->model->$primaryKey = $this->db->insert_id();
             return true;
+        }
+        return false;
+    }
+
+    public function delete(){
+        if($this->model && $this->model->isExists()){
+            if($this->where){
+                $this->db->where($this->where);
+            }else if($primaryValue = $this->model->getPrimaryValue()){
+                $this->db->where($this->model->getPrimaryKey(),$primaryValue);
+            }else{
+                die('Primary value is not exist');
+            }
+            return $this->db->delete($this->model->getTable());
         }
         return false;
     }
