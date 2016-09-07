@@ -58,6 +58,12 @@ abstract class Model
      */
     protected $origins = [];
 
+
+    /**
+     * 填充字段
+     * @var array
+     */
+    protected $fills = [];
     /**
      * @var Formatter
      */
@@ -91,17 +97,18 @@ abstract class Model
      * @return bool
      */
     public function save(){
-        $this->builder = new Builder();
+        $this->builder = $this->newBuilder();
         $this->builder->setModel($this);
         if($this->exists){
             $result = $this->builder->update();
         }else{
             $result = $this->builder->insert();
+            if($result){
+                $this->exists = true;
+                $this->origins = array_merge($this->origins,array_keys($this->fills));
+            }
         }
-        if($result){
-            return true;
-        }
-        return false;
+        return $result;
     }
 
     public function resultHandle($queryResult){
@@ -154,5 +161,23 @@ abstract class Model
 
     public function getTable(){
         return $this->table;
+    }
+
+    public function getFillsData(){
+        return $this->fills;
+    }
+
+
+    private function newBuilder(){
+        if(!$this->builder){
+            $this->builder = new Builder();
+        }
+        return $this->builder;
+    }
+
+    public function __set($name, $value)
+    {
+        $this->$name = $value;
+        $this->fills[$name] = $value;
     }
 }

@@ -58,7 +58,9 @@ class Builder
      * @param Model $model
      */
     public function setModel(Model &$model){
-        $this->model = $model;
+        if($this->model == null){
+            $this->model = &$model;
+        }
     }
 
     /**
@@ -145,17 +147,21 @@ class Builder
      */
     public function update(){
         if($updateArray = $this->getUpdateFieldAndValue()){
-            $primaryKey = $this->model->getPrimaryKey();
-            if(isset($this->model->$primaryKey)){
-                $primaryValue = $this->model->$primaryKey;
+            if($this->where){
+                $this->db->where($this->where);
             }else{
-                $originField = $this->model->getAttributes()[$primaryKey];
-                $primaryValue = $this->model->$originField;
+                $primaryKey = $this->model->getPrimaryKey();
+                if(isset($this->model->$primaryKey)){
+                    $primaryValue = $this->model->$primaryKey;
+                }else{
+                    $originField = $this->model->getAttributes()[$primaryKey];
+                    $primaryValue = $this->model->$originField;
+                }
+                if(!$primaryValue){
+                    throw new \ErrorException;
+                }
+                $this->db->where($primaryKey,$primaryValue);
             }
-            if(!$primaryValue){
-                throw new \ErrorException;
-            }
-            $this->db->where($primaryKey,$primaryValue);
             return $this->db->update($this->model->getTable(),$updateArray);
         }
         return false;
@@ -175,9 +181,25 @@ class Builder
     }
 
     public function insert(){
-        return true;
+        $fills = $this->model->getFillsData();
+        $helper = new ModelHelper($this->model);
+        $modelPublicAttribute = $helper->getPublicAttributes();
+        $insertValues = [];
+        foreach($fills as $key => $value){
+            if(in_array($value,$modelPublicAttribute)){
+                unset($fills[$key]);
+                continue;
+            }
+            $insertValues[$key] = $value;
+        }
+        $insertResult = $this->db->insert($this->model->getTable(),$insertValues);
+        if($insertResult) {
+            $primaryKey = $this->model->getPrimaryKey();
+            $this->model->$primaryKey = $this->db->insert_id();
+            return true;
+        }
+        return false;
     }
-
     /**
      * 获取最后一条sql
      * @return string
