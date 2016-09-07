@@ -106,15 +106,13 @@ or
 >     $user->user_mobile = '13347818106';
 >     $user->save();
 > },function(){
->    echo 'success Retrieve';
+>    echo 'success';
 > },function(){
->    echo 'error Retrieve';
+>    echo 'error';
 > });
 > ```
 
 To DO LIST:
 
-* Complete the Update And Delete Insert
-* Resolve the Model Relationship
-* Resoleve the Transaction, Maybe it has been resolved now, just you can use the CI's transaction
-* Complete the collection data, not return an array
+* Add the Model Relationship
+* Wrap the collection data instead of an array
