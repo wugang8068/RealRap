@@ -57,3 +57,10 @@ In the User.php, we can just write like this:
 >
 > }
 > ```
+
+To DO LIST:
+
+* Complete the Update And Delete Insert
+* Resolve the Model Relationship
+* Resoleve the Transaction, Maybe it has been resolved now, just you can use the CI's transaction
+* Complete the collection data, not return an array
