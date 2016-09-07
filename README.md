@@ -89,6 +89,12 @@ In the User.php, we can just write like this:
 > }
 > ```
 
+or
+
+> ```
+> User::findWhere(['user_mobile' => '18600908262'])->delete()
+> ```
+
 To DO LIST:
 
 * Complete the Update And Delete Insert

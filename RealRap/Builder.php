@@ -205,6 +205,9 @@ class Builder
                 die('Primary value is not exist');
             }
             return $this->db->delete($this->model->getTable());
+        }else if($this->where){
+            $this->db->where($this->where);
+            return $this->db->delete($this->model->getTable());
         }
         return false;
     }
