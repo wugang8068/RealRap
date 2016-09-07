@@ -58,6 +58,30 @@ In the User.php, we can just write like this:
 > }
 > ```
 
+### Update
+
+> ```
+> $user = User::findWhere([
+>     'user_mobile' => '12381121695'
+> ])->getOne();
+> if($user){
+>     $user->user_mobile = '134234';
+>     $user->save();
+> }
+> ```
+
+
+
+### Insert
+
+> ```
+> $user = new User();
+> $user->user_nick_name = 'Tom';
+> $user->save();
+> ```
+
+
+
 To DO LIST:
 
 * Complete the Update And Delete Insert
