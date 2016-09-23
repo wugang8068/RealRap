@@ -1,6 +1,5 @@
 {
     "name": "csitc/real-rap",
-    "type": "library",
     "description": "Codeigniter ORM",
     "keywords": ["ci", "orm"],
     "version": "0.0.1",
