@@ -6,7 +6,8 @@ This is a CI ORM, and inspired by laravel eloquent
 ### How to install:
 
 ```
-composer require csitc/real-rap
+composer require csitc/real-rap dev-master
+
 ```
 
 ### Retrieve
