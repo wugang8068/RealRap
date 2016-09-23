@@ -5,11 +5,11 @@ use App\models\User;
 
 class Welcome extends CI_Controller {
 
-
     /**
      * @var User
      */
     private $user;
+
 	public function update()
 	{
 		$user = User::findWhere(['user_mobile' => '12381121695'])->getOne();
@@ -25,14 +25,13 @@ class Welcome extends CI_Controller {
 	}
 
 	public function retrieve(){
-        $this->user = User::all(['*'])->where([
+        $this->user = User::all(['*'])->with(['key','order'])->where([
             'user_mobile' => '17010058640'
         ])->order([
             'user_id' => 'desc',
             'user_mobile' => 'desc'
         ])->limit(1)->getOne();
         dump($this->user);
-        dump($this->user->key);
 	}
 
     public function transaction(){

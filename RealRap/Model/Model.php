@@ -18,57 +18,49 @@ use RealRap\Formatter;
 
 abstract class Model
 {
+
     /**
-     * 表名
-     * @var
+     * @var string
      */
     protected $table;
+
     /**
-     * 主键名
      * @var string
      */
     protected $primaryKey = 'id';
 
     /**
-     * 属性列表
      * @var array
      */
     protected $attributes = [];
 
     /**
-     * 隐藏字段
      * @var array
      */
     protected $hidden = [];
 
     /**
-     * 显示字段
      * @var array
      */
     protected $visible = [];
 
     /**
-     * 附加字段
      * @var array
      */
     protected $appends = [];
 
     /**
-     * 类型转换字段
      * @var array
      */
     protected $cast    = [];
 
 
     /**
-     * 原始字段
      * @var array
      */
     protected $origins = [];
 
-
     /**
-     * 填充字段
      * @var array
      */
     protected $fills = [];
@@ -82,10 +74,18 @@ abstract class Model
      * @var
      */
     private $exists;
+
     /**
      * @var Builder
      */
     private $builder;
+
+
+    /**
+     * @var array
+     */
+    private $hiddenValues = [];
+
     /**
      * @param array $column
      * @return Builder
@@ -111,6 +111,7 @@ abstract class Model
     /**
      * handle the result data
      * @param $queryResult
+     * @param array $withinDataArray
      * @return array
      */
     public function resultHandle($queryResult){
@@ -118,17 +119,19 @@ abstract class Model
         foreach($queryResult as $row){
             $instance = new static;
             foreach($row as $key => $value){
+                $finalValue = $value;
+                //如果有转换字段,则对字段类型进行转换
+                if($instance->cast && isset($instance->cast[$key])){
+                    $finalValue = $instance->format($value,$instance->cast[$key]);
+                }
+                if($instance->primaryKey != $key){
+                    $instance->origins[] = $key;
+                }
                 //如果不在隐藏字段中
-                if(!in_array($key,$instance->hidden)){
-                    //如果有转换字段,则对字段类型进行转换
-                    if($instance->cast && isset($instance->cast[$key])){
-                        $instance->$key = $instance->format($value,$instance->cast[$key]);
-                    }else{
-                        $instance->$key = $value;
-                    }
-                    if($instance->primaryKey != $key){
-                        $instance->origins[] = $key;
-                    }
+                if(in_array($key,$instance->hidden)){
+                    $instance->hiddenValues[$key] = $finalValue;
+                }else{
+                    $instance->$key = $finalValue;
                     if(isset($instance->attributes[$key])){
                         $replaceKey = $instance->attributes[$key];
                         $instance->$replaceKey = $instance->$key;
@@ -268,7 +271,6 @@ abstract class Model
         return new OneToOne($relatedModelClass,$foreignKey,$localKey);
     }
 
-
     /**
      * @param $relatedModelClass
      * @param $foreignKey
@@ -295,7 +297,9 @@ abstract class Model
             $replaceKey = $this->attributes[$name];
             return $this->$replaceKey;
         }
-
+        if(isset($this->hiddenValues[$name])){
+            return $this->hiddenValues[$name];
+        }
         $relation = $this->$name();
         if($relation instanceof Relation){
             $relationQueryHandle = new RelationQueryHandle($relation,$this);

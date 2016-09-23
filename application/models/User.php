@@ -41,8 +41,12 @@ class User extends Model
         'user_id' => 'id',
     ];
 
-    protected function key(){
+    public function key(){
         return $this->hasMany(Key::class,'cdk_bind_user');
         //return $this->hasOne(Key::class,'cdk_bind_user');
+    }
+
+    public function order(){
+        return $this->hasOne(Order::class,'related_user');
     }
 }

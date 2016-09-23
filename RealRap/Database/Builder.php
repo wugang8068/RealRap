@@ -8,10 +8,14 @@
 
 namespace RealRap\Database;
 
+use RealRap\Relation\OneToMany;
+use RealRap\Relation\OneToOne;
+use RealRap\Relation\Relation;
+use RealRap\Relation\RelationQueryHandle;
+use RealRap\Relation\RelationWithQueryHandle;
 use RealRap\Traits\RealRapDatabase;
 use RealRap\Helper\ModelHelper;
 use RealRap\Model\Model;
-use RealRap\Database\BuilderJoin;
 
 class Builder
 {
@@ -32,10 +36,22 @@ class Builder
      */
     private $where = [];
 
+
+    /**
+     * @var array
+     */
+    private $whereIn = [];
+
     /**
      * @var array
      */
     private $order = [];
+
+    /**
+     * Relation with array
+     * @var array
+     */
+    private $with = [];
 
     /**
      * @var
@@ -53,8 +69,10 @@ class Builder
      */
     private $joinRelations = [];
 
+
     /**
      * @param Model $model
+     * @return $this
      */
     public function setModel(Model &$model){
         if($this->model == null){
@@ -63,8 +81,10 @@ class Builder
         return $this;
     }
 
+
     /**
      * @param $column
+     * @return $this
      */
     public function setColumn($column){
         $this->column = $column;
@@ -84,6 +104,17 @@ class Builder
         return $this;
     }
 
+
+    /**
+     * @param string $column
+     * @param array $data
+     * @return $this
+     */
+    public function whereIn($column, array $data){
+        $this->whereIn[$column] = $data;
+        return $this;
+    }
+
     /**
      * order
      * @param $order
@@ -91,6 +122,16 @@ class Builder
      */
     public function order($order){
         $this->order = array_merge($this->order,$order);
+        return $this;
+    }
+
+
+    /**
+     * @param array $withItems
+     * @return $this
+     */
+    public function with(array $withItems){
+        $this->with = array_merge($this->with,$withItems);
         return $this;
     }
 
@@ -112,15 +153,6 @@ class Builder
         return $this;
     }
 
-
-    /**
-     * @param BuilderJoin $join
-     */
-    public function setJoin($join){
-        $this->joinRelations[] = $join;
-        return $this;
-    }
-
     /**
      * 获取列表集合
      * @return Model[]
@@ -131,6 +163,11 @@ class Builder
         $this->db->from($this->model->getTable());
         if($this->where){
             $this->db->where($this->where);
+        }
+        if($this->whereIn){
+            foreach($this->whereIn as $where => $value){
+                $this->db->where_in($where,$value);
+            }
         }
         if($this->order){
             foreach($this->order as $order => $sort){
@@ -146,7 +183,9 @@ class Builder
             $tempArray[] = $row;
         }
         $this->db->flush_cache();
-        return $this->model->resultHandle($tempArray);
+        $resultModelArray = $this->model->resultHandle($tempArray);
+        $this->_handleRelationResult($resultModelArray);
+        return $resultModelArray;
     }
 
 
@@ -245,5 +284,46 @@ class Builder
      */
     public function getLastQuery(){
         return $this->db->last_query();
+    }
+
+
+    private function _handleRelationResult(&$resultModelArray){
+        if($resultModelArray && $this->with){
+            $firstResultModel = $resultModelArray[0];
+            foreach($this->with as $with){
+                $relation = $firstResultModel->$with();
+                if($relation instanceof Relation){
+                    $queryHandle = new RelationWithQueryHandle($relation,$firstResultModel,array_map(function($element) use ($relation){
+                        $relationValue = $relation->getLocalKey();
+                        return $element->$relationValue;
+                    },$resultModelArray));
+                    $relationResult = $queryHandle->handleRelationResult();
+                    if($relationResult){
+                        foreach($resultModelArray as &$model){
+                            foreach($relationResult as $key => &$result){
+                                $relationLocalKey = $relation->getLocalKey();
+                                $relationForeignKey = $relation->getForeignKey();
+                                if($result->$relationForeignKey == $model->$relationLocalKey){
+                                    if($relation instanceof OneToOne){
+                                        $model->$with = $result;
+                                    }
+                                    else if($relation instanceof OneToMany){
+                                        if (isset($model->$with)){
+                                            array_push($model->$with,$result);
+                                        }else{
+                                            $model->$with = [$result];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        foreach($resultModelArray as &$model){
+                            $model->$with = null;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

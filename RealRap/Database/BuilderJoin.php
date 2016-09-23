@@ -18,7 +18,6 @@ class BuilderJoin
 
     public $joinType;
 
-
     public function __construct($joinTableName, $joinRelation, $joinType)
     {
         $this->joinTableName = $joinTableName;
