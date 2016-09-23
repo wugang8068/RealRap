@@ -12,8 +12,7 @@
     "require": {
         "php": ">=5.5.30"
     },
-    "minimum-stability": "stable",
-    "prefer-stable": true,
+    "minimum-stability": "dev",
     "autoload": {
         "psr-4": { "RealRap\\": "" }
     }
