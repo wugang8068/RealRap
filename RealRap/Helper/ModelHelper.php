@@ -6,7 +6,7 @@
  * Time: 09:36
  */
 
-namespace RealRap;
+namespace RealRap\Helper;
 
 
 class ModelHelper

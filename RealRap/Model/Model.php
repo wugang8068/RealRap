@@ -6,10 +6,18 @@
  * Time: 14:45
  */
 
-namespace RealRap;
+namespace RealRap\Model;
+use RealRap\Exception\ModelNotFoundException;
+use RealRap\Exception\ModelFormatException;
+use RealRap\Relation\OneToMany;
+use RealRap\Relation\OneToOne;
+use RealRap\Relation\Relation;
+use RealRap\Relation\RelationQueryHandle;
+use RealRap\Database\Builder;
+use RealRap\Formatter;
+
 abstract class Model
 {
-
     /**
      * 表名
      * @var
@@ -64,6 +72,7 @@ abstract class Model
      * @var array
      */
     protected $fills = [];
+
     /**
      * @var Formatter
      */
@@ -161,12 +170,12 @@ abstract class Model
         return $this->builder->delete();
     }
 
+
     /**
-     * format the field value
      * @param $value
      * @param $cast
      * @return mixed
-     * @throws Exception\ModelFormatException
+     * @throws ModelFormatException
      */
     private function format($value, $cast){
         if(!$this->formatter){
@@ -243,6 +252,54 @@ abstract class Model
             if(isset($this->$originField)){
                 return $this->$originField;
             }
+        }
+        return null;
+    }
+
+
+    /**
+     * @param Model::class $relatedModelClass
+     * @param string $foreignKey
+     * @param null $localKey
+     * @return OneToOne
+     */
+    function hasOne($relatedModelClass, $foreignKey ,$localKey = null){
+        $localKey = $localKey ?: $this->getPrimaryKey();
+        return new OneToOne($relatedModelClass,$foreignKey,$localKey);
+    }
+
+
+    /**
+     * @param $relatedModelClass
+     * @param $foreignKey
+     * @param null $localKey
+     * @return OneToMany
+     */
+    function hasMany($relatedModelClass, $foreignKey , $localKey = null){
+        $localKey = $localKey ?: $this->getPrimaryKey();
+        return new OneToMany($relatedModelClass,$foreignKey,$localKey);
+    }
+
+    function __call($name, $arguments)
+    {
+        throw new ModelNotFoundException('Can not found the attribute or relation model');
+    }
+
+    public function __get($name)
+    {
+        $reflection = new \ReflectionClass(self::class);
+        if($reflection->hasProperty($name)){
+            return $this->$name;
+        }
+        if(isset($this->attributes[$name])){
+            $replaceKey = $this->attributes[$name];
+            return $this->$replaceKey;
+        }
+
+        $relation = $this->$name();
+        if($relation instanceof Relation){
+            $relationQueryHandle = new RelationQueryHandle($relation,$this);
+            return $relationQueryHandle->handleRelationResult();
         }
         return null;
     }

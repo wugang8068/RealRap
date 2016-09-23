@@ -5,13 +5,16 @@ use App\models\User;
 
 class Welcome extends CI_Controller {
 
+
+    /**
+     * @var User
+     */
+    private $user;
 	public function update()
 	{
 		$user = User::findWhere(['user_mobile' => '12381121695'])->getOne();
 		if($user){
-			$user->user_mobile = '134234';
-			$user->save();
-			print_r($user);
+			print_r($user->user_mobile);
 		}
 	}
 
@@ -22,23 +25,21 @@ class Welcome extends CI_Controller {
 	}
 
 	public function retrieve(){
-        $users = User::all(['*'])->where([
-            'user_id <=' => 50
+        $this->user = User::all(['*'])->where([
+            'user_mobile' => '17010058640'
         ])->order([
             'user_id' => 'desc',
             'user_mobile' => 'desc'
         ])->limit(1)->getOne();
-        print_r(json_encode($users));
+        $key0 = $this->user->key[0];
+        print_r($key0);
 	}
 
     public function transaction(){
         \RealRap\RealRap::trans(function(){
-
-
             $user = new User();
             $user->user_mobile = '13345727773';
             $user->save();
-
             $user = new User();
             $user->user_mobile = '13347808105';
             $user->save();

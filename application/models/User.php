@@ -1,7 +1,7 @@
 <?php
 
 namespace App\models;
-use RealRap\Model;
+use RealRap\Model\Model as Model;
 
 /**
  * Class User
@@ -40,4 +40,9 @@ class User extends Model
     protected $attributes = [
         'user_id' => 'id',
     ];
+
+    protected function key(){
+        return $this->hasMany(Key::class,'cdk_bind_user');
+        //return $this->hasOne(Key::class,'cdk_bind_user');
+    }
 }

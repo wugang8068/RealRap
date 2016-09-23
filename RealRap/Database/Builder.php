@@ -6,9 +6,12 @@
  * Time: 15:27
  */
 
-namespace RealRap;
+namespace RealRap\Database;
 
 use RealRap\Traits\RealRapDatabase;
+use RealRap\Helper\ModelHelper;
+use RealRap\Model\Model;
+use RealRap\Database\BuilderJoin;
 
 class Builder
 {
@@ -22,7 +25,7 @@ class Builder
     /**
      * @var array
      */
-    private $column;
+    private $column = ['*'];
 
     /**
      * @var array
@@ -46,12 +49,18 @@ class Builder
 
 
     /**
+     * @var BuilderJoin[]
+     */
+    private $joinRelations = [];
+
+    /**
      * @param Model $model
      */
     public function setModel(Model &$model){
         if($this->model == null){
             $this->model = &$model;
         }
+        return $this;
     }
 
     /**
@@ -59,6 +68,7 @@ class Builder
      */
     public function setColumn($column){
         $this->column = $column;
+        return $this;
     }
 
 
@@ -101,6 +111,16 @@ class Builder
         $this->offset = $offset;
         return $this;
     }
+
+
+    /**
+     * @param BuilderJoin $join
+     */
+    public function setJoin($join){
+        $this->joinRelations[] = $join;
+        return $this;
+    }
+
     /**
      * 获取列表集合
      * @return Model[]
