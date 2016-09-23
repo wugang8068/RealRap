@@ -26,11 +26,11 @@ class Welcome extends CI_Controller {
 
 	public function retrieve(){
         $this->user = User::all(['*'])->with(['key','order'])->where([
-            'user_mobile' => '17010058640'
+            'user_id < ' => 20
         ])->order([
             'user_id' => 'desc',
             'user_mobile' => 'desc'
-        ])->limit(1)->getOne();
+        ])->get();
         dump($this->user);
 	}
 

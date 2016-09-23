@@ -300,6 +300,7 @@ class Builder
                     $relationResult = $queryHandle->handleRelationResult();
                     if($relationResult){
                         foreach($resultModelArray as &$model){
+                            $model->$with = null;
                             foreach($relationResult as $key => &$result){
                                 $relationLocalKey = $relation->getLocalKey();
                                 $relationForeignKey = $relation->getForeignKey();
@@ -316,6 +317,7 @@ class Builder
                                     }
                                 }
                             }
+
                         }
                     }else{
                         foreach($resultModelArray as &$model){
