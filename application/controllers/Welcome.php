@@ -31,8 +31,8 @@ class Welcome extends CI_Controller {
             'user_id' => 'desc',
             'user_mobile' => 'desc'
         ])->limit(1)->getOne();
-        $key0 = $this->user->key;
-        print_r($key0);
+        dump($this->user);
+        dump($this->user->key);
 	}
 
     public function transaction(){
