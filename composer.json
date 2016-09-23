@@ -1,5 +1,5 @@
 {
-    "name": "RealRap",
+    "name": "realRap/realRap",
     "type": "library",
     "description": "Codeigniter ORM",
     "keywords": ["ci", "orm"],
