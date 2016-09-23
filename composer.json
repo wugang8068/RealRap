@@ -2,7 +2,6 @@
     "name": "csitc/real-rap",
     "description": "Codeigniter ORM",
     "keywords": ["ci", "orm"],
-    "version": "0.0.1",
     "license": "MIT",
     "authors": [
         {
