@@ -2,6 +2,12 @@
 
 This is a CI ORM, and inspired by laravel eloquent
 
+### How to install:
+
+```
+composer require csitc/real-rap
+```
+
 ### Retrieve
 
 Example: We need to fetch the user where user\_id &gt;= 50 and order by user\_id and user\_mobile and get the first one
