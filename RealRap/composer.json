@@ -1,0 +1,21 @@
+{
+    "name": "RealRap",
+    "type": "library",
+    "description": "Codeigniter ORM",
+    "keywords": ["ci", "orm"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chart",
+            "email": "152806894@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.30"
+    },
+    "autoload": {
+        "files": [ "Resources/functions/dump.php" ],
+        "psr-4": { "RealRap\\": "" }
+    },
+    "minimum-stability": "dev"
+}
