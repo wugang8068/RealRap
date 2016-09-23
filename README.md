@@ -70,7 +70,7 @@ In the User.php, we can just write like this:
 > }
 > ```
 
-### Insert
+### Create
 
 > ```
 > $user = new User();
@@ -112,7 +112,61 @@ or
 > });
 > ```
 
+
+### **Model Relation**
+
+if we want to add model relation, for example, there is a table named *==inf_user==*, and a table named *==inf\_cd\_keys==*, and each recored in *==inf_user==* has one or many record inf *==inf\_cd\_keys==*, so it's easy to access the result with the flowing code;
+
+First, get the user record
+
+```
+$this->user = User::all(['*'])->where([
+            'user_mobile' => '17010058640'
+        ])->order([
+            'user_id' => 'desc',
+            'user_mobile' => 'desc'
+        ])->limit(1)->getOne();
+```
+Then fetch if by the flowing:
+
+```
+$keys = $this->user->key  
+//The $keys is an array within objects or an object or null depends on the relation in User.php
+```
+
+The model can be write in this:
+
+```
+User.php
+
+class User extends Model
+{    
+
+	protected $table = 'inf_user';
+
+	protected $primaryKey = 'user_id';
+    
+	protected function key(){
+        return $this->hasMany(Key::class,'cdk_bind_user');
+        //return $this->hasOne(Key::class,'cdk_bind_user');
+    }
+}
+
+Key.php
+
+class Key extends Model
+{
+
+    protected $table = 'inf_cd_keys';
+
+    protected $primaryKey = 'cdk_id';
+
+}
+
+```
+
 To DO LIST:
 
-* Add the Model Relationship
 * Wrap the collection data instead of an array
+
+
