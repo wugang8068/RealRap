@@ -14,8 +14,6 @@
         "php": ">=5.5.30"
     },
     "autoload": {
-        "files": [ "Resources/functions/dump.php" ],
         "psr-4": { "RealRap\\": "" }
-    },
-    "minimum-stability": "dev"
+    }
 }
