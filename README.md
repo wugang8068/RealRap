@@ -23,7 +23,7 @@ Example: We need to fetch the user where user\_id &gt;= 50 and order by user\_id
 >     ->limit(1)->getOne();
 > ```
 
-The result mybe like this:
+The result maybe like this:
 
 ```
 {
