@@ -2,6 +2,7 @@
 
 This is a CI ORM, and inspired by laravel eloquent
 
+中文地址: https://github.com/wugang8068/RealRap/blob/master/ReadMe_zh.md
 
 ### How to install:
 
